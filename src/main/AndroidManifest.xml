@@ -5,7 +5,8 @@
     android:versionName="1.0">
 
     <uses-sdk android:minSdkVersion="1" />
-    <application android:icon="@drawable/icon">
+    <application android:icon="@drawable/icon"
+                 android:largeHeap="true">
         <activity android:name=".RamStressActivity"
             android:label="Ram Stress"
             android:enabled="true"
