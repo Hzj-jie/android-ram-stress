@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+// import android.text.method.ScrollingMovementMethod;
 import android.view.MotionEvent;
 import android.widget.TextView;
 import java.util.Date;
@@ -26,6 +27,7 @@ public class RamStressActivity extends Activity {
   protected void onCreate(Bundle bundle) {
     super.onCreate(bundle);
     setContentView(R.layout.main);
+    // text().setMovementMethod(new ScrollingMovementMethod());
   }
 
   @Override
@@ -47,8 +49,8 @@ public class RamStressActivity extends Activity {
           me.writeln("Start at ", new Date());
           me.writeln("You may press here again to stop.");
           me.writeln("Detected pointer size is ", POINTER_SIZE);
-          final int SIZE = 256 * 1024;
-          final int SLICE_SIZE = 64 * 1024;
+          final int SIZE = 4 * 1024 * 1024;
+          final int SLICE_SIZE = 4 * 1024;
           final int M_SIZE = SIZE * POINTER_SIZE;
           byte[][] m;
           try {
@@ -63,7 +65,7 @@ public class RamStressActivity extends Activity {
           for (; i < SIZE && me.thread != null; i++) {
             try {
               m[i] = new byte[SLICE_SIZE];
-              if (i % 1000 == 999) {
+              if (i % 65536 == 65535) {
                 me.writeAllocInfo((long)(i + 1) * SLICE_SIZE + M_SIZE);
               }
             } catch (OutOfMemoryError err) {
@@ -71,6 +73,7 @@ public class RamStressActivity extends Activity {
               break;
             }
           }
+          m = null;
           final long size = (long)(i) * SLICE_SIZE + M_SIZE;
           me.writeln("Maximum memory allocatable is ",
                      size,
@@ -99,13 +102,14 @@ public class RamStressActivity extends Activity {
         return;
       }
 
-      StringBuilder builder = new StringBuilder();
-      for (Object arg : args) {
-        builder.append(arg);
-      }
+      try {
+        StringBuilder builder = new StringBuilder();
+        for (Object arg : args) {
+          builder.append(arg);
+        }
 
-      TextView view = (TextView) findViewById(R.id.text);
-      view.append(builder.toString());
+        text().append(builder.toString());
+      } catch (OutOfMemoryError err) {}
     }
   }
 
@@ -120,8 +124,7 @@ public class RamStressActivity extends Activity {
       });
       return;
     }
-    TextView view = (TextView) findViewById(R.id.text);
-    view.setText("");
+    text().setText("");
   }
 
   private void writeln(final Object... args) {
@@ -133,5 +136,9 @@ public class RamStressActivity extends Activity {
 
   private void writeAllocInfo(final long size) {
     writeln("Allocated ", size, " bytes memory, ~", size / 1024 / 1024, "MB");
+  }
+
+  private TextView text() {
+    return (TextView) findViewById(R.id.text);
   }
 }
